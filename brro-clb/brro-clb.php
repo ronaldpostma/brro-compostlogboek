@@ -16,21 +16,6 @@
  * - Template loading filters (log form, reports, user request form)
  * - Row action link additions (brro_clb_add_logboek_row_action)
  * ===============================================
- * 
- * to do's:
- * - remove from settings page the settings for log and reports page
- * - check each file for comments and structure
- * - add an index to each file
- * - add the background color from the settings to the reports page template as well
- * - add a function on log form submit to email the person if their email is filled in
- * - add a optional parameter to ?rapport with the email address, and generate a report with all log entries for that email address
- * - change in the report 'vanaf begin' to the actual date of the oldest log entry
- * - change in the report 'nu' to 'nu + (the date of today)'
- * 
- * - feedback from Rowin implementation
- * - finish plugin and add to github
- * - add update mechanism
- * - implement live on compostier.nl
  */
 
 // Exit if accessed directly
