@@ -1,4 +1,17 @@
 <?php
+/**
+ * Settings functions - plugin configuration interface
+ * ===============================================
+ * This file contains the functions for the plugin settings page in the
+ * WordPress admin, including form rendering, settings registration,
+ * validation, and sanitization.
+ * ===============================================
+ * Index
+ * - Settings page output (brro_clb_settings_page)
+ * - Settings scripts enqueuing (brro_clb_enqueue_settings_scripts)
+ * - Settings registration (brro_clb_register_settings)
+ * - Settings validation and sanitization (brro_clb_settings_validate)
+ */
 if (!defined('ABSPATH')) exit;
 
 // Output the settings page content

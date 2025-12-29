@@ -1,10 +1,22 @@
 <?php
 /**
- * Reports functions - database display
+ * Reports functions - creation, display, and data retrieval
  * ===============================================
- * This file contains the functions for displaying saved reports
- * in the wp-admin page.
+ * This file contains the functions for creating reports (admin form),
+ * displaying saved reports in the wp-admin page, generating frontend reports,
+ * retrieving and calculating report data with statistics, and supporting
+ * email-based user reports.
  * ===============================================
+ * Index
+ * - Helper functions (get_post_type_for_locations, get_post_type_taxonomy)
+ * - Admin report form (brro_clb_reports_form)
+ * - Report submission handling (brro_clb_handle_report_submission)
+ * - Admin reports page (brro_clb_reports_page)
+ * - Report data retrieval and statistics (brro_clb_get_report_data)
+ * - Device-email mapping (brro_clb_build_device_email_mapping)
+ * - Unique user counting (brro_clb_count_unique_users)
+ * - Frontend report generation (brro_clb_get_rapport)
+ * - Report header generation (brro_clb_get_report_header)
  */
 
 

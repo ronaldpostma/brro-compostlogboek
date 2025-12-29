@@ -26,8 +26,9 @@
  * - clb_report_locations (text, JSON-encoded string: either 'all' or array of post IDs representing selected locations)
  *   NOTE: This field stores either the string 'all' or a JSON-encoded array of location post IDs.
  *   Use json_encode() when saving and json_decode() when reading.
- * - clb_report_taxonomy_terms (text, JSON-encoded string: contains taxonomy name and array of term IDs when filtering by taxonomy)
- *   NOTE: This field stores JSON: {"taxonomy": "taxonomy_name", "term_ids": [1, 2, 3]} or empty/null when not used.
+ * - clb_report_taxonomy_terms (text, JSON-encoded string: contains taxonomy terms when filtering by taxonomy)
+ *   NOTE: This field stores JSON in the new format: {"terms": [{"taxonomy": "taxonomy_name", "term_id": 1}, ...]} 
+ *   or the legacy format: {"taxonomy": "taxonomy_name", "term_ids": [1, 2, 3]} for backward compatibility, or empty/null when not used.
  * 
  * ===============================================
  */

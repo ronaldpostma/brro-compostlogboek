@@ -8,6 +8,15 @@
  * Author URI: https://brro.nl/
  * 
  * 
+ * ===============================================
+ * Index
+ * - Plugin constants and file includes
+ * - Asset enqueuing (brro_clb_enqueue_assets)
+ * - Admin menu creation (brro_clb_menu_items)
+ * - Template loading filters (log form, reports, user request form)
+ * - Row action link additions (brro_clb_add_logboek_row_action)
+ * ===============================================
+ * 
  * to do's:
  * - remove from settings page the settings for log and reports page
  * - check each file for comments and structure

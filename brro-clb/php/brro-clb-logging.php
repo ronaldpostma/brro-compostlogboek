@@ -1,15 +1,16 @@
 <?php
 /**
- * Logging functions - database, wp-admin page, shortcode, form submission
+ * Logging functions - database, wp-admin page, form submission, form generation
  * ===============================================
  * This file contains the functions for logging activities to the database,
- * displaying the logs in the wp-admin page, and handling the form submission.
+ * displaying the logs in the wp-admin page, handling the form submission,
+ * and generating the log form HTML.
  * ===============================================
  * Index
-* - Email Encryption Functions
-* - Admin page
-* - Form submission handling
-* - Shortcode
+ * - Email Encryption Functions (encrypt, decrypt, hash, mask, get_logs_by_email)
+ * - Admin page (brro_clb_logs_page)
+ * - Form submission handling (brro_clb_handle_form_submission)
+ * - Log form HTML generation (brro_clb_get_log_form)
  */
 
 
