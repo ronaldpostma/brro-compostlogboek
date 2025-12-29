@@ -1,1 +1,519 @@
-/* Brro compost logboek styles */
+/* ============================================================================
+   BRRO COMPOST LOGBOEK - MAIN STYLESHEET
+   ============================================================================ */
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+/* Hide WordPress admin bar */
+#wpadminbar {
+    display: none !important;
+}
+html {
+    margin-top: 0 !important;
+}
+
+/* ============================================================================
+   TYPOGRAPHY
+   ============================================================================ */
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Base font family and alignment */
+body, html, p, button, a, input, select, textarea, label, span, div, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif!important;
+    text-align: center!important;
+}
+
+/* Heading styles */
+h1,
+.report-title {
+    font-weight: 600!important;
+    font-size: 36px!important;
+    line-height: 38px!important;
+}
+
+h2 {
+    font-weight: 600!important;
+    font-size: 28px!important;
+    line-height: 34px!important;
+}
+
+h3,
+.clb-form-title {
+    font-weight: 600!important;
+    font-size: 22px!important;
+    line-height: 28px!important;
+}
+
+h4,
+.brro-clb-total-summary.brro-clb-report-summary {
+    font-size: 20px!important;
+    line-height: 26px!important;
+}
+
+/* Links, buttons, and labels */
+a, button, label {
+    font-weight: 500!important;
+    font-size: 16px!important;
+    line-height: 22px!important;
+}
+
+/* Paragraphs */
+p,
+div, 
+span {
+    font-weight: 400!important;
+    font-size: 16px!important;
+    line-height: 22px!important;
+}
+p {
+    margin: 16px auto!important;
+}
+
+@media (min-width: 768px) {
+    p,
+    .clb_privacy_policy_content {
+        max-width: 75%!important;
+    }
+}
+
+/* Form title */
+.clb-form-title {
+    margin-top: 40px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+/* Privacy policy content */
+.clb_privacy_policy_content {
+    font-size: 14px !important;
+    line-height: 20px!important;
+    background-color: rgba(0, 0, 0, .05);
+    padding: 16px !important;
+    border-radius: 10px !important;
+    margin: 16px auto !important;
+    text-align: left!important;
+}
+
+h1,
+.clb-description {
+    margin-bottom: 16px!important;
+}
+
+
+/* ============================================================================
+   TEMPLATE LAYOUT
+   ============================================================================ */
+
+/* Main template wrapper */
+.brro-clb-template-wrapper {
+    max-width: min(96%, 768px);
+    margin: 60px auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Template header */
+.brro-clb-template-header {
+    margin: 32px 0 40px;
+}
+
+/* Logo styles */
+.brro-clb-logo {
+    width: auto;
+    height: 120px;
+    margin-bottom: 40px;
+}
+
+
+/* ============================================================================
+   REPORTS STYLES
+   ============================================================================ */
+
+/* Report wrapper and content */
+.brro-clb-reports .brro-clb-template-wrapper {
+    background-color:white!important;
+}
+
+.brro-clb-reports .brro-clb-report-content {
+    max-width: 640px!important;
+    margin: 0 auto!important;
+    padding: 0!important;
+}
+
+.brro-clb-reports .brro-clb-report-summary {
+    margin: 6px 0;
+}
+
+.brro-clb-reports .brro-clb-template-wrapper .brro-clb-report-content * {
+    text-align: left !important;
+    letter-spacing: 0.5px;
+}
+
+/* Report complete logs section */
+.brro-clb-reports .brro-clb-report-complete-logs {
+    margin-top: 40px;
+}
+
+.brro-clb-report-complete-logs .brro-clb-logo {
+    height: 72px;
+    margin-bottom: 0px;
+    margin-right: 32px;
+    display: inline-block;
+}
+
+.brro-clb-report-complete-logs .brro-clb-template-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.brro-clb-report-complete-logs .brro-clb-template-header .report-title {
+    font-weight: 400!important;
+    font-size: 24px!important;
+    line-height: 30px!important;
+    text-align: left!important;
+}
+
+.brro-clb-report-complete-logs table {
+    margin-top: 24px;
+}
+
+/* Hide header in report complete logs (shown only in print) */
+.brro-clb-reports .brro-clb-report-complete-logs .brro-clb-template-header {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+    width: 0;
+    opacity: 0;
+}
+
+/* Report tables */
+.brro-clb-reports table.report-logs-table * {
+    font-size: 12px!important;
+    line-height:15px!important;
+}
+
+/* Logo filter for reports */
+.brro-clb-reports .brro-clb-logo {
+    filter: contrast(100%) brightness(0);
+}
+
+/* Print button */
+.brro-clb-reports #fixed-print-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: yellow;
+    border: 4px solid purple;
+    color: purple;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.brro-clb-reports #fixed-print-button:hover {
+    background-color: purple;
+    color: yellow;
+    border-color: yellow;
+}
+
+/* Print styles */
+@media print {
+    /* Hide everything by default */
+    .brro-clb-reports * {
+        visibility: hidden;
+    }
+    
+    /* Show only the wrapper and its contents */
+    .brro-clb-reports .brro-clb-template-wrapper,
+    .brro-clb-reports .brro-clb-template-wrapper * {
+        visibility: visible;
+    }
+    
+    /* Show header in report complete logs when printing */
+    .brro-clb-reports .brro-clb-report-complete-logs .brro-clb-template-header {
+        visibility: visible;
+        height: auto;
+        overflow: auto;
+        width: auto;
+        opacity: 1;
+    }
+    
+    /* Position the wrapper at the top of the page */
+    .brro-clb-reports .brro-clb-template-wrapper {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background-color: white !important;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Remove margins and padding from body/html for printing */
+    body.brro-clb-reports {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+        background-color: white !important;
+    }
+    
+    /* Ensure no page breaks inside the wrapper content */
+    .brro-clb-reports .brro-clb-template-wrapper {
+        page-break-inside: avoid;
+    }
+    
+    /* Ensure report complete logs sections start on a new page */
+    .brro-clb-reports .brro-clb-report-complete-logs {
+        page-break-before: always;
+    }
+}
+
+
+/* ============================================================================
+   LOGGING FORM STYLES
+   ============================================================================ */
+.brro-clb-template-wrapper .notice {
+    max-width: clamp(330px, calc(25vw + 240px), 600px) /*330px @ 360 : 600px @ 1440*/;
+}
+/* Main form container */
+form {
+    background-color: #dcdcdc;
+    padding: 40px 20px;
+    border-radius: 10px;
+    max-width: clamp(330px, calc(25vw + 240px), 600px) /*330px @ 360 : 600px @ 1440*/;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Form rows */
+form .clb-form-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap:16px;
+    flex-wrap: wrap;
+    align-items: stretch;
+    margin-bottom: 24px;
+    position: relative;
+}
+.clb-unit-helper {
+    font-size: 18px!important;
+    display: block;
+    width:100%;
+}
+.clb-unit-helper * {
+    font-size: 18px!important;
+}
+form .clb-unit-amount-button {
+    color: white;
+    background: darkslategray;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding: 0;
+    line-height: 30px !important;
+    margin: 0 12px;
+    cursor: pointer;
+    font-size: 18px !important;
+}
+#unit_amount_increase {
+    transform: translateX(-7px);
+}
+#unit_amount {
+    transform: translateX(-4px);
+}
+#unit_amount_decrease {
+    line-height: 28px !important;
+}
+.clb-unit-amount-buttons.clb-active-kilo {
+    transform: translateX(-62px);
+    opacity: 1;
+}
+.clb-unit-amount-buttons.clb-active-liter {
+    transform: translateX(79px);
+    opacity: 1;
+}
+.clb-unit-amount-buttons {
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0.3;
+}
+
+form .clb-unit-amount-button:hover {
+    background: mediumseagreen;
+}
+form .clb-unit-buttons {
+    max-width: 290px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap:16px;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+/* Hidden form rows */
+form .clb-form-row.clb-hidden {
+    opacity: 0.4;
+    pointer-events: none;
+    /*display: none;*/
+}
+
+/* Label button styles (radio button labels) */
+form .clb-label-btn {
+    width: clamp(107px, 33.33vw, 125px) /*120px @ 360*/;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: silver;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+form .clb-label-btn.wide-btn {
+    width: 135px;
+}
+form .clb-label-btn img {
+    vertical-align: middle;
+    width: auto;
+    height: 42px;
+    margin-bottom: 10px;
+}
+
+form .clb-label-btn:hover {
+    background-color: #d0d0d0;
+}
+
+/* Active/selected label button */
+form .clb-label-btn:active,
+form input[type="radio"]:checked + .clb-label-btn {
+    background-color: mediumseagreen;
+    color: white;
+}
+
+form .clb-label-btn:active img,
+form input[type="radio"]:checked + .clb-label-btn img {
+    filter: invert(1);
+}
+
+/* Disabled submit button */
+form input[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Email save checkbox - disabled state when email is invalid */
+form #clb_user_email_save:disabled,
+form #clb_user_email_save[style*="pointer-events: none"] {
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+    cursor: not-allowed;
+}
+
+/* submit */
+form input[type="submit"] {
+    font-size: 24px !important;
+    line-height: 24px !important;
+    padding: 20px !important;
+    background-color: burlywood !important;
+    color: black !important;
+    border-radius: 12px!important;
+}
+
+form input[type="submit"]:hover {
+    background-color: darkred !important;
+    color: white !important;
+}
+/* ============================================================================
+   TOOLTIP STYLES
+   ============================================================================ */
+
+/* Tooltip icon and cursor */
+form .clb_tooltip_icon,
+form .clb-form-title:has(.clb_tooltip_icon) {
+    cursor: help;
+}
+
+/* Tooltip icon appearance */
+form .clb_tooltip_icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #999;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    margin-left: 8px;
+    vertical-align: middle;
+    position: relative;
+}
+
+form .clb_tooltip_icon:hover {
+    background-color: #666;
+}
+
+/* Tooltip popup */
+form .clb_tooltip {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 0;
+    background-color: #333;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px!important;
+    line-height: 16px!important;
+    max-width: 250px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin-top: 8px;
+    text-align: left;
+    white-space: normal;
+}
+
+/* Tooltip arrow */
+form .clb_tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 10%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #333;
+}
+
+/* Show tooltip on hover */
+form .clb-form-title:hover ~ .clb_tooltip {
+    display: block;
+}
+
+/* Tooltip paragraph */
+form .clb_tooltip p {
+    margin: 0;
+    padding: 0;
+}
