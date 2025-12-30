@@ -32,8 +32,12 @@ define( 'brro_clb_url', plugin_dir_url( __FILE__ ) );
 require_once brro_clb_dir . '/php/brro-clb-database.php';
 require_once brro_clb_dir . '/php/brro-clb-settings.php';
 require_once brro_clb_dir . '/php/brro-clb-locations.php';
-require_once brro_clb_dir . '/php/brro-clb-reports.php';
-require_once brro_clb_dir . '/php/brro-clb-logging.php';
+require_once brro_clb_dir . '/php/brro-clb-email.php';
+require_once brro_clb_dir . '/php/brro-clb-logging-admin.php';
+require_once brro_clb_dir . '/php/brro-clb-logging-form.php';
+require_once brro_clb_dir . '/php/brro-clb-reports-admin.php';
+require_once brro_clb_dir . '/php/brro-clb-reports-data.php';
+require_once brro_clb_dir . '/php/brro-clb-reports-display.php';
 
 /**
  * Enqueue Styles & Scripts
@@ -96,7 +100,7 @@ function brro_clb_menu_items() {
         'Compost Logboek', // Menu title
         'manage_options', // Capability
         'brro-clb-logs', // Menu slug
-        'brro_clb_logs_page', // Function included in /php/brro-clb-logging.php
+        'brro_clb_logs_page', // Function included in /php/brro-clb-logging-admin.php
         'dashicons-book', // Icon
     );
     // Submenu item: Logboek
@@ -106,7 +110,7 @@ function brro_clb_menu_items() {
         'Logboek', // Menu title
         'manage_options', // Capability
         'brro-clb-logs', // Menu slug (same as parent)
-        'brro_clb_logs_page', // Function included in /php/brro-clb-logging.php
+        'brro_clb_logs_page', // Function included in /php/brro-clb-logging-admin.php
     );
     // Submenu item: Locaties, only if selected in options
     $settings = get_option('brro_clb_settings', []);
@@ -127,7 +131,7 @@ function brro_clb_menu_items() {
         'Rapportage', // Menu title
         'manage_options', // Capability
         'brro-clb-reports', // Menu slug
-        'brro_clb_reports_page', // Function included in /php/brro-clb-reports.php
+        'brro_clb_reports_page', // Function included in /php/brro-clb-reports-admin.php
     );
     // Submenu item: Settings
     add_submenu_page(

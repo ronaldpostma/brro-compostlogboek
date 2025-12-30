@@ -1,300 +1,16 @@
 <?php
 /**
- * Logging functions - database, wp-admin page, form submission, form generation
+ * Logging form functions - form generation and submission handling
  * ===============================================
- * This file contains the functions for logging activities to the database,
- * displaying the logs in the wp-admin page, handling the form submission,
- * and generating the log form HTML.
+ * This file contains functions for generating the frontend log form HTML and
+ * handling form submissions. Processes POST data, validates input, encrypts
+ * email addresses, and saves log entries to the database.
  * ===============================================
  * Index
- * - Email Encryption Functions (encrypt, decrypt, hash, mask, get_logs_by_email)
- * - Admin page (brro_clb_logs_page)
  * - Form submission handling (brro_clb_handle_form_submission)
  * - Log form HTML generation (brro_clb_get_log_form)
  */
-
-
-
-
-
-
-
-
-
-/**
- * Email Encryption Functions
- * ===============================================
- * These functions handle encryption, decryption, and masking of email addresses
- * for privacy protection. Emails are encrypted before saving to the database
- * and can be decrypted when needed (e.g., for sending confirmation emails).
- * ===============================================
- */
-
-/**
- * Encrypt email address for database storage
- * 
- * Uses AES-256-CBC encryption with WordPress authentication salt as the key.
- * Each encryption uses a unique initialization vector (IV) for security.
- * The IV is prepended to the encrypted data for decryption.
- * 
- * @param string $email Email address to encrypt
- * @return string|false Encrypted email (base64 encoded) or false on failure
- */
-function brro_clb_encrypt_email($email) {
-    // Return null if email is empty (allows NULL in database)
-    if (empty($email)) {
-        return null;
-    }
-    
-    // Check if OpenSSL is available
-    if (!function_exists('openssl_encrypt')) {
-        error_log('Brro CLB: OpenSSL not available for email encryption');
-        return false;
-    }
-    
-    // Use WordPress authentication salt as encryption key
-    // This ensures the key is unique per WordPress installation
-    $key = wp_salt('auth');
-    
-    // Generate a random initialization vector (IV) for this encryption
-    // IV length depends on cipher method (AES-256-CBC requires 16 bytes)
-    $iv_length = openssl_cipher_iv_length('AES-256-CBC');
-    $iv = openssl_random_pseudo_bytes($iv_length);
-    
-    // Encrypt the email using AES-256-CBC
-    $encrypted = openssl_encrypt($email, 'AES-256-CBC', $key, 0, $iv);
-    
-    // Check if encryption was successful
-    if ($encrypted === false) {
-        error_log('Brro CLB: Email encryption failed');
-        return false;
-    }
-    
-    // Prepend IV to encrypted string and base64 encode for safe storage
-    // IV is needed for decryption, so we store it with the encrypted data
-    return base64_encode($iv . $encrypted);
-}
-
-/**
- * Decrypt email address from database
- * 
- * Extracts the IV from the stored data and uses it to decrypt the email.
- * Uses the same WordPress authentication salt as the encryption function.
- * 
- * @param string $encrypted_email Encrypted email string from database (base64 encoded)
- * @return string|false Decrypted email address or false on failure
- */
-function brro_clb_decrypt_email($encrypted_email) {
-    // Return null if encrypted email is empty
-    if (empty($encrypted_email)) {
-        return null;
-    }
-    
-    // Check if OpenSSL is available
-    if (!function_exists('openssl_decrypt')) {
-        error_log('Brro CLB: OpenSSL not available for email decryption');
-        return false;
-    }
-    
-    // Use the same WordPress authentication salt as encryption
-    $key = wp_salt('auth');
-    
-    // Decode from base64
-    $data = base64_decode($encrypted_email);
-    
-    if ($data === false) {
-        error_log('Brro CLB: Failed to decode encrypted email');
-        return false;
-    }
-    
-    // Extract IV and encrypted data
-    // IV length is always 16 bytes for AES-256-CBC
-    $iv_length = openssl_cipher_iv_length('AES-256-CBC');
-    $iv = substr($data, 0, $iv_length);
-    $encrypted = substr($data, $iv_length);
-    
-    // Decrypt using the extracted IV
-    $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', $key, 0, $iv);
-    
-    if ($decrypted === false) {
-        error_log('Brro CLB: Email decryption failed');
-        return false;
-    }
-    
-    return $decrypted;
-}
-
-/**
- * Hash email address for database searching
- * 
- * Creates a SHA256 hash of the normalized (lowercased) email address.
- * This enables efficient indexed database lookups while maintaining privacy.
- * The hash is deterministic - same email always produces same hash.
- * 
- * @param string $email Email address to hash
- * @return string|null SHA256 hash (64-character hex string) or null if email is empty/invalid
- */
-function brro_clb_hash_email($email) {
-    // Return null if email is empty
-    if (empty($email)) {
-        return null;
-    }
-    
-    // Sanitize and normalize email (lowercase for case-insensitive matching)
-    $sanitized_email = sanitize_email($email);
-    if (!$sanitized_email) {
-        return null;
-    }
-    
-    // Normalize to lowercase for case-insensitive matching
-    $normalized_email = strtolower($sanitized_email);
-    
-    // Hash using SHA256 (produces 64-character hex string)
-    return hash('sha256', $normalized_email);
-}
-
-/**
- * Mask email address for privacy-safe display
- * 
- * Shows first 2 characters of local part, masks the rest.
- * Example: "john@example.com" becomes "jo****@example.com"
- * Domain part is always shown in full for identification purposes.
- * 
- * @param string $email Email address to mask
- * @return string Masked email address (e.g., "jo****@example.com") or "Anoniem" if invalid
- */
-function brro_clb_mask_email($email) {
-    // Return "Anoniem" if email is empty
-    if (empty($email)) {
-        return 'Anoniem';
-    }
-    
-    // Split email into local part (before @) and domain part (after @)
-    $parts = explode('@', $email);
-    
-    // Validate email format (should have exactly 2 parts)
-    if (count($parts) !== 2) {
-        return 'Anoniem';
-    }
-    
-    $local = $parts[0];  // Part before @
-    $domain = $parts[1]; // Part after @
-    
-    // Show first 2 characters of local part, mask the rest with asterisks
-    // Minimum 2 asterisks for privacy, more if local part is longer
-    $masked_local = substr($local, 0, 2) . str_repeat('*', max(2, strlen($local) - 2));
-    
-    // Return masked local part + @ + full domain
-    return $masked_local . '@' . $domain;
-}
-
-/**
- * Find log entries by email address
- * 
- * Hashes the search email and queries the database using the indexed hash column.
- * This is much more efficient than decrypting all emails for comparison.
- * 
- * @param string $email Email address to search for
- * @return array Array of log entries matching the email, empty array if none found
- */
-function brro_clb_get_logs_by_email($email) {
-    global $wpdb;
-    $table_name = brro_clb_get_table_name();
-    
-    // Hash the search email (function handles sanitization and normalization)
-    $email_hash = brro_clb_hash_email($email);
-    
-    // If hashing failed (invalid email), return empty array
-    if (!$email_hash) {
-        return array();
-    }
-    
-    // Query database for entries with matching email hash (uses indexed column)
-    $logs = $wpdb->get_results($wpdb->prepare(
-        "SELECT * FROM $table_name WHERE clb_log_email_hash = %s ORDER BY clb_log_date DESC, clb_log_time DESC",
-        $email_hash
-    ), ARRAY_A);
-    
-    return $logs ? $logs : array();
-}
-
-// Output the admin page content
-function brro_clb_logs_page() {
-    global $wpdb;
-    $table_name = brro_clb_get_table_name();
-    
-    // Get all log entries, ordered by most recent first
-    $logs = $wpdb->get_results(
-        "SELECT * FROM $table_name ORDER BY clb_log_date DESC, clb_log_time DESC",
-        ARRAY_A
-    );
-    
-    ?>
-    <div class="wrap">
-        <h1>Compost Logboek</h1>
-        
-        <?php if (empty($logs)): ?>
-            <p>Er zijn nog geen logboek entries.</p>
-        <?php else: ?>
-            <p>Totaal aantal entries: <strong><?php echo count($logs); ?></strong></p>
-            
-            <table class="wp-list-table widefat fixed striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Datum</th>
-                        <th>Tijd</th>
-                        <th>Locatie</th>
-                        <th>Activiteit</th>
-                        <th>Gewicht (kg)</th>
-                        <th>Email</th>
-                        <th>Device ID</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($logs as $log): ?>
-                        <tr>
-                            <td><?php echo esc_html(str_pad($log['clb_log_id'], 6, '0', STR_PAD_LEFT)); ?></td>
-                            <td><?php echo esc_html(date_i18n(get_option('date_format'), strtotime($log['clb_log_date']))); ?></td>
-                            <td><?php echo esc_html(substr($log['clb_log_time'], 0, 5)); ?></td>
-                            <td>
-                                <strong><?php echo esc_html($log['clb_log_location_name']); ?></strong><br>
-                                <small>ID: <?php echo esc_html($log['clb_log_location_id']); ?></small>
-                            </td>
-                            <td>
-                                <?php 
-                                $activity_label = ($log['clb_log_activity'] === 'input') ? 'Groenafval toevoegen' : 'Compost oogsten';
-                                echo esc_html($activity_label);
-                                ?>
-                            </td>
-                            <td><?php echo esc_html(number_format_i18n($log['clb_log_total_weight'], 2)); ?></td>
-                            <td>
-                                <?php 
-                                // Decrypt and mask email for privacy-safe display
-                                if (!empty($log['clb_log_email'])) {
-                                    $decrypted_email = brro_clb_decrypt_email($log['clb_log_email']);
-                                    if ($decrypted_email) {
-                                        // Display masked email (e.g., "jo****@example.com")
-                                        echo esc_html(brro_clb_mask_email($decrypted_email));
-                                    } else {
-                                        // Decryption failed, show generic message
-                                        echo '<em>Versleuteld</em>';
-                                    }
-                                } else {
-                                    // No email provided
-                                    echo '<em>Anoniem</em>';
-                                }
-                                ?>
-                            </td>
-                            <td><code><?php echo esc_html($log['clb_log_device_id']); ?></code></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-    </div>
-    <?php
-}
+if (!defined('ABSPATH')) exit;
 
 /**
  * Handle form submission and save to database
@@ -307,7 +23,7 @@ function brro_clb_handle_form_submission() {
     }
     
     global $wpdb;
-    $table_name = brro_clb_get_table_name();
+    $table_name = brro_clb_get_logs_table_name();
     
     // Validate required fields
     $required_fields = array(
@@ -549,12 +265,12 @@ function brro_clb_get_log_form($location_post_id = null) {
             </div>
             <input type="radio" id="input" name="clb_action" value="input" style="display: none;">
             <label class="clb-label-btn" for="input">
-                <img src="<?php echo plugins_url('img/noun-trash-6869140.png', dirname(__FILE__)); ?>" alt="Groenafval toevoegen">
+                <img src="<?php echo plugins_url('img/noun-trash-6869140.png', dirname(dirname(__FILE__))); ?>" alt="Groenafval toevoegen">
                 Groenafval toevoegen
             </label>
             <input type="radio" id="output" name="clb_action" value="output" style="display: none;">
             <label class="clb-label-btn" for="output">
-                <img src="<?php echo plugins_url('img/noun-compost-6898126.png', dirname(__FILE__)); ?>" alt="Compost oogsten">
+                <img src="<?php echo plugins_url('img/noun-compost-6898126.png', dirname(dirname(__FILE__))); ?>" alt="Compost oogsten">
                 Compost oogsten
             </label>
         </div>
@@ -576,7 +292,7 @@ function brro_clb_get_log_form($location_post_id = null) {
                     <!-- default units kg and liter -->
                     <input type="radio" id="unit_type_kg" name="clb_unit_type" value="kg" style="display: none;">
                     <label class="clb-label-btn" for="unit_type_kg">
-                        <img src="<?php echo plugins_url('img/clb-unit-kg.png', dirname(__FILE__)); ?>" alt="Kg">
+                        <img src="<?php echo plugins_url('img/clb-unit-kg.png', dirname(dirname(__FILE__))); ?>" alt="Kg">
                         Kg
                     </label>
                     <?php
@@ -587,7 +303,7 @@ function brro_clb_get_log_form($location_post_id = null) {
                     <?php if ($input_volweight > 0 && $output_volweight > 0): ?>
                     <input type="radio" id="unit_type_liter" name="clb_unit_type" value="liter" data-input-weight="<?php echo esc_attr($input_volweight); ?>" data-output-weight="<?php echo esc_attr($output_volweight); ?>" style="display: none;">
                     <label class="clb-label-btn" for="unit_type_liter">
-                        <img src="<?php echo plugins_url('img/clb-unit-l.png', dirname(__FILE__)); ?>" alt="Liter">
+                        <img src="<?php echo plugins_url('img/clb-unit-l.png', dirname(dirname(__FILE__))); ?>" alt="Liter">
                         Liter
                     </label>
                 </div>
@@ -702,3 +418,4 @@ function brro_clb_get_log_form($location_post_id = null) {
     <?php
     return ob_get_clean();
 }
+

@@ -33,16 +33,28 @@ Main plugin file that initializes the plugin and loads all required components. 
 Manages database table creation and maintenance for logs and reports. Defines the schema for two custom tables: `brro_clb_logs` (stores all activity entries) and `brro_clb_reports` (stores saved report configurations). Handles database version tracking and automatic schema migrations when the plugin is updated. Ensures tables exist on plugin activation and during admin initialization.
 
 **brro-clb-settings.php**  
-Provides the settings page interface in the WordPress admin. Allows configuration of page selections for reports and forms, location management mode (plugin CPT or existing CPT), custom units (input and output units with icons and weights), volume-to-weight conversions, and visual styling options (logo URL, background colors, title colors). Handles settings validation and sanitization before saving to the database.
+Provides the settings page interface in the WordPress admin. Allows configuration of location management mode (plugin CPT or existing CPT), custom units (input and output units with icons and weights), volume-to-weight conversions, and visual styling options (logo URL, background colors, title colors). Handles settings validation and sanitization before saving to the database.
 
 **brro-clb-locations.php**  
 Conditionally registers the compost locations custom post type based on plugin settings. Supports two modes: active mode (when using plugin's built-in locations) and legacy/disabled mode (when using existing CPT, but keeping legacy posts addressable). Implements redirects for legacy mode to prevent access to old CPT endpoints. Handles detection of existing posts to determine registration behavior.
 
-**brro-clb-logging.php**  
-Core logging functionality including email encryption/decryption functions for privacy protection, email hashing for efficient database searches, and email masking for privacy-safe display. Provides the admin page that displays all log entries in a table format. Handles form submission processing to save log entries to the database. Includes the reusable function that generates the log form HTML, which supports various unit types (kg, liter, custom units) and calculates weights dynamically based on configured settings.
+**brro-clb-email.php**  
+Email security and retrieval functions used by both logging and reports modules. Provides email encryption (AES-256-CBC) and decryption functions for privacy protection, email hashing (SHA256) for efficient indexed database searches, email masking for privacy-safe display, and a function to retrieve logs by email address. All email functions use WordPress authentication salt for encryption keys, ensuring unique keys per WordPress installation.
 
-**brro-clb-reports.php**  
-Manages report creation and display functionality. Provides the admin interface for creating new reports with filters for locations (all, specific locations, or taxonomy terms), date ranges (all time or specific period), and taxonomy-based filtering. Handles report form submission and saves report configurations to the database. Displays saved reports in a table with links to view them on the frontend. Includes the frontend report generation function that retrieves logs based on report criteria, calculates statistics (total activities, weights, unique users), groups logs by location or taxonomy categories, and formats the output for display. Supports email-based reports for individual users.
+**brro-clb-logging-admin.php**  
+Admin interface for viewing logs. Displays all log entries in a table format with masked email addresses for privacy. Shows log ID, date, time, location, activity type, weight, masked email, and device ID. Uses email decryption and masking functions from the email module.
+
+**brro-clb-logging-form.php**  
+Frontend form generation and submission handling. Processes form POST data, validates required fields, encrypts and hashes email addresses before saving, and stores log entries in the database. Generates the reusable log form HTML that supports various unit types (kg, liter, custom units) and calculates weights dynamically based on configured settings. Handles success/error messages and redirects to prevent duplicate submissions.
+
+**brro-clb-reports-admin.php**  
+Provides the admin interface for creating and managing reports. Includes helper functions to get the post type and taxonomy for locations based on plugin settings. Contains the form for generating new reports with filters for locations (all, specific locations, or taxonomy terms) and date ranges (all time or specific period). Handles report form submission, validates input, and saves report configurations to the database. Displays saved reports in a table format with links to view them on the frontend.
+
+**brro-clb-reports-data.php**  
+Handles data retrieval, processing, and statistics calculation for reports. Builds device-email mappings to identify which device IDs belong to which email users for accurate user counting. Counts unique users from logs using email-priority logic. Retrieves logs from the database based on report criteria (date range, locations, taxonomy filters), calculates statistics (total activities, weights, unique users), and returns structured data for display.
+
+**brro-clb-reports-display.php**  
+Generates frontend report HTML output. Handles both report ID-based reports and email-based user reports. Groups logs by location or taxonomy categories, formats statistics and data for display, and renders complete HTML output including summary sections, per-category breakdowns, per-location breakdowns, and complete log tables. Includes the report header generation function that displays logo and site name.
 
 ---
 

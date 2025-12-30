@@ -78,59 +78,13 @@ function brro_clb_settings_page() {
         // Output any registered settings sections (currently none, but kept for future use)
         do_settings_sections('brro_clb_settings_group');
         
-        // Page select for reports url generation
         // Get current settings from the 'brro_clb_settings' option (registered below)
         $options = get_option('brro_clb_settings', array());
-        $reportPage = isset($options['brro_clb_reportpage']) ? absint($options['brro_clb_reportpage']) : 0;
-        // Page select for form page (logboek formulier shortcode)
-        $formPage = isset($options['brro_clb_formpage']) ? absint($options['brro_clb_formpage']) : 0;
         // Locations choice (how compost locations are stored on this site)
         $locationsChoice = isset($options['brro_clb_locations_choice']) ? sanitize_text_field($options['brro_clb_locations_choice']) : 'clb-l';
         // Selected custom post type for compost locations (when using own CPT)
         $locationsPostType = isset($options['brro_clb_locations']) ? sanitize_text_field($options['brro_clb_locations']) : '';
         ?>
-        <fieldset class="brro-clb-fieldset">
-            <legend><h2>Rapportage pagina</h2></legend>
-            <label for="brro_clb_reportpage">Op welke pagina staat de rapportage shortcode?</label>
-            <?php
-            // Field name uses array notation: 'brro_clb_settings[brro_clb_reportpage]'
-            // This saves the value as $options['brro_clb_reportpage'] in the 'brro_clb_settings' option
-            wp_dropdown_pages(array(
-                'name' => 'brro_clb_settings[brro_clb_reportpage]',
-                'id' => 'brro_clb_reportpage',
-                'selected' => $reportPage,
-                'show_option_none' => 'Selecteer',
-                'option_none_value' => '',
-                'class' => 'brro-clb-page-select',
-                'echo' => 1,
-            ));
-            ?>
-            <p class="description">
-                De geselecteerde pagina wordt gebruikt om de link naar de rapportage pagina aan te maken.
-            </p>
-        </fieldset>
-
-        <fieldset class="brro-clb-fieldset">
-            <legend><h2>Formulier pagina</h2></legend>
-            <label for="brro_clb_formpage">Op welke pagina staat de logboek formulier shortcode?</label>
-            <?php
-            // Field name uses array notation: 'brro_clb_settings[brro_clb_formpage]'
-            // This saves the value as $options['brro_clb_formpage'] in the 'brro_clb_settings' option
-            wp_dropdown_pages(array(
-                'name' => 'brro_clb_settings[brro_clb_formpage]',
-                'id' => 'brro_clb_formpage',
-                'selected' => $formPage,
-                'show_option_none' => 'Selecteer',
-                'option_none_value' => '',
-                'class' => 'brro-clb-page-select',
-                'echo' => 1,
-            ));
-            ?>
-            <p class="description">
-                De geselecteerde pagina wordt gebruikt om de link naar het logboek formulier aan te maken.
-            </p>
-        </fieldset>
-
         <fieldset class="brro-clb-fieldset">
             <legend><h2>Compostlocaties</h2></legend>
             <p>
@@ -438,14 +392,6 @@ function brro_clb_settings_validate($input) {
     // This is important for conditionally hidden fields (e.g., brro_clb_locations when choice is 'clb-l')
     $existing = get_option('brro_clb_settings', array());
     $output = $existing; // Start with existing values to preserve them
-    // Sanitize brro_clb_reportpage: ensure it's a positive integer (page ID)
-    if (isset($input['brro_clb_reportpage'])) {
-        $output['brro_clb_reportpage'] = absint($input['brro_clb_reportpage']);
-    }
-    // Sanitize brro_clb_formpage: ensure it's a positive integer (page ID)
-    if (isset($input['brro_clb_formpage'])) {
-        $output['brro_clb_formpage'] = absint($input['brro_clb_formpage']);
-    }
     // Sanitize brro_clb_locations_choice: allow only defined values, default to 'clb-l'
     if (isset($input['brro_clb_locations_choice'])) {
         $choice = sanitize_text_field($input['brro_clb_locations_choice']);
