@@ -288,3 +288,93 @@ function brro_clb_add_logboek_row_action($actions, $post) {
 }
 add_filter('post_row_actions', 'brro_clb_add_logboek_row_action', 10, 2);
 add_filter('page_row_actions', 'brro_clb_add_logboek_row_action', 10, 2);
+
+/**
+ * ===============================================
+ * UPDATE MECHANISM
+ * ===============================================
+ */
+
+/**
+ * Check for plugin updates from custom endpoint
+ * 
+ * Hooks into WordPress update system to check for new versions
+ * by fetching update info from a JSON endpoint.
+ * 
+ * @param object $checked_data WordPress update data
+ * @return object Modified update data with plugin update info if available
+ */
+function brro_clb_check_for_plugin_update($checked_data) {
+    if (empty($checked_data->checked)) {
+        return $checked_data;
+    }
+    
+    // Define the plugin slug
+    $plugin_slug = 'brro-compostlogboek';
+    $plugin_path = plugin_basename(__FILE__);
+    
+    // Fetch the latest plugin info from custom URI
+    $response = brro_clb_get_plugin_update_info();
+    
+    // Ensure the plugin_path key is set and valid before comparing versions
+    if ($response && isset($checked_data->checked[$plugin_path]) && version_compare($checked_data->checked[$plugin_path], $response->new_version, '<')) {
+        $checked_data->response[$plugin_path] = (object) [
+            'url' => $response->url,
+            'slug' => $plugin_slug,
+            'package' => $response->package,
+            'new_version' => $response->new_version,
+            'tested' => $response->tested,
+        ];
+    }
+    
+    return $checked_data;
+}
+add_filter('pre_set_site_transient_update_plugins', 'brro_clb_check_for_plugin_update');
+
+/**
+ * Fetch plugin update information from JSON endpoint
+ * 
+ * Retrieves update information from the custom JSON endpoint hosted
+ * at brro.nl. The JSON should contain version, package URL, and other
+ * update metadata.
+ * 
+ * @return object|false Plugin update data object or false on failure
+ */
+function brro_clb_get_plugin_update_info() {
+    $update_info_url = 'https://www.brro.nl/git-webhook/brro-compostlogboek-info.json';
+    $response = wp_remote_get($update_info_url);
+    
+    if (is_wp_error($response)) {
+        return false; // Bail early on request error
+    }
+    
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body);
+    
+    if (!is_null($data)) {
+        return $data;
+    }
+    
+    return false;
+}
+
+/**
+ * Add "View changes" link to plugin row meta
+ * 
+ * Adds a link to the GitHub releases page in the plugin list table,
+ * allowing users to view changelog and release notes.
+ * 
+ * @param array $links Existing plugin row meta links
+ * @param string $file Plugin file path
+ * @return array Modified links array
+ */
+add_filter('plugin_row_meta', 'brro_clb_plugin_row_meta', 10, 2);
+function brro_clb_plugin_row_meta($links, $file) {
+    if ($file == plugin_basename(__FILE__)) {
+        $new_links = array(
+            '<a href="https://github.com/ronaldpostma/brro-compostlogboek/releases" target="_blank">' . __('View changes', 'brro-clb') . '</a>',
+        );
+        $links = array_merge($links, $new_links);
+    }
+    return $links;
+}
