@@ -112,7 +112,7 @@ function brro_clb_settings_page() {
                 Deze keuze bepaalt of de plugin eigen compostlocaties beheert of aansluit op een bestaand custom post type.
             </p>
 
-        <?php if ($locationsChoice === 'own') : ?>
+        <div id="brro-clb-posttype-section" style="<?php echo ($locationsChoice === 'own') ? '' : 'display:none;'; ?>">
             <h2 style="margin-top:40px;">Posttype voor compostlocaties</h2>
             <label for="brro_clb_locations">Kies het posttype met je compostlocaties</label>
             <?php
@@ -144,7 +144,7 @@ function brro_clb_settings_page() {
             <p class="description">
                 De berichten van dit posttype worden gebruikt als compostlocaties. Voor elke locatie kan een unieke url worden gemaakt voor het logboek formulier, en voor de rapportage pagina.
             </p>
-        <?php endif; ?>
+        </div>
         </fieldset>
 
         <fieldset class="brro-clb-fieldset">
@@ -366,10 +366,29 @@ function brro_clb_enqueue_settings_scripts($hook) {
     wp_enqueue_style('wp-color-picker');
     wp_enqueue_script('wp-color-picker');
     
-    // Add inline script to initialize color picker
+    // Add inline script to initialize color picker and dynamic posttype section
     wp_add_inline_script('wp-color-picker', '
-        jQuery(document).ready(function($) {
+        jQuery(function($) {
             $(".brro-clb-color-picker").wpColorPicker();
+            
+            // Function to toggle posttype section visibility
+            function brro_clb_toggle_posttype_section() {
+                var selectedChoice = $(\'input[name="brro_clb_settings[brro_clb_locations_choice]"]:checked\').val();
+                var $section = $(\'#brro-clb-posttype-section\');
+                if (selectedChoice === \'own\') {
+                    $section.slideDown();
+                } else {
+                    $section.slideUp();
+                }
+            }
+            
+            // Toggle on radio button change
+            $(\'input[name="brro_clb_settings[brro_clb_locations_choice]"]\').change(function() {
+                brro_clb_toggle_posttype_section();
+            });
+            
+            // Initial check on page load
+            brro_clb_toggle_posttype_section();
         });
     ');
 }
