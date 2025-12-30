@@ -1,6 +1,6 @@
 # Brro Compost Logboek
 
-A WordPress plugin for tracking compost activities (groenafval toevoegen and compost oogsten) at various locations. The plugin allows users to log their composting activities through a frontend form, stores this data in custom database tables, and provides reporting functionality for administrators and users.
+A WordPress plugin for tracking compost activities (adding green-waste and harvesting compost) at appointed locations. The plugin allows users to log their composting activities through a frontend form, stores this data in custom database tables, and provides reporting functionality for administrators and users.
 
 ## Overview
 
