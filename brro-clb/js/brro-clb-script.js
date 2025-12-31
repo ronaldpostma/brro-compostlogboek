@@ -155,14 +155,22 @@ jQuery(document).ready(function($) {
         var isValid = isValidEmail(email);
         
         if (isValid) {
-            // Enable checkbox
+            // Enable checkboxes
             $('#clb_user_email_save').css({
                 'opacity': '1',
                 'pointer-events': 'auto'
             }).prop('disabled', false);
+            $('#clb_send_confirmation_email').css({
+                'opacity': '1',
+                'pointer-events': 'auto'
+            }).prop('disabled', false);
         } else {
-            // Disable checkbox
+            // Disable checkboxes
             $('#clb_user_email_save').css({
+                'opacity': '0.5',
+                'pointer-events': 'none'
+            }).prop('disabled', true).prop('checked', false);
+            $('#clb_send_confirmation_email').css({
                 'opacity': '0.5',
                 'pointer-events': 'none'
             }).prop('disabled', true).prop('checked', false);
@@ -184,6 +192,12 @@ jQuery(document).ready(function($) {
         }
     }
     
+    // Load saved confirmation email preference from localStorage
+    var sendConfirmationEmail = localStorage.getItem('brro_clb_send_confirmation_email');
+    if (sendConfirmationEmail === 'true') {
+        $('#clb_send_confirmation_email').prop('checked', true);
+    }
+    
     // Initial check on page load
     updateEmailSaveCheckbox();
 
@@ -196,6 +210,21 @@ jQuery(document).ready(function($) {
     if (saveEmail && email) {
         try {
             localStorage.setItem('brro_clb_user_email', email);
+        } catch (e) {
+            // localStorage might be unavailable (privacy mode etc.), ignore errors
+        }
+    }
+    // Save confirmation email preference if checkbox is checked
+    var sendConfirmationEmail = $('#clb_send_confirmation_email').is(':checked');
+    if (sendConfirmationEmail) {
+        try {
+            localStorage.setItem('brro_clb_send_confirmation_email', 'true');
+        } catch (e) {
+            // localStorage might be unavailable (privacy mode etc.), ignore errors
+        }
+    } else {
+        try {
+            localStorage.removeItem('brro_clb_send_confirmation_email');
         } catch (e) {
             // localStorage might be unavailable (privacy mode etc.), ignore errors
         }

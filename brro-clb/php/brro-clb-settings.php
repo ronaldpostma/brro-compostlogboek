@@ -337,6 +337,39 @@ function brro_clb_settings_page() {
             </p>
         </fieldset>
 
+        <fieldset class="brro-clb-fieldset">
+            <legend><h2>Email instellingen</h2></legend>
+            <?php
+            // Get current email settings
+            $email_from_address = isset($options['brro_clb_email_from_address']) ? esc_attr($options['brro_clb_email_from_address']) : '';
+            $email_from_name = isset($options['brro_clb_email_from_name']) ? esc_attr($options['brro_clb_email_from_name']) : '';
+            ?>
+            <p>
+                <label for="brro_clb_email_from_address">Afzender emailadres</label><br />
+                <input type="email"
+                       id="brro_clb_email_from_address"
+                       name="brro_clb_settings[brro_clb_email_from_address]"
+                       value="<?php echo esc_attr($email_from_address); ?>"
+                       class="regular-text"
+                       placeholder="noreply@example.com" />
+                <p class="description">
+                    Het emailadres dat wordt gebruikt als afzender voor bevestigingsemails.
+                </p>
+            </p>
+            <p>
+                <label for="brro_clb_email_from_name">Afzender naam</label><br />
+                <input type="text"
+                       id="brro_clb_email_from_name"
+                       name="brro_clb_settings[brro_clb_email_from_name]"
+                       value="<?php echo esc_attr($email_from_name); ?>"
+                       class="regular-text"
+                       placeholder="Compost Logboek" />
+                <p class="description">
+                    De naam die wordt weergegeven als afzender voor bevestigingsemails.
+                </p>
+            </p>
+        </fieldset>
+
         <?php
         submit_button();
         ?>
@@ -563,6 +596,21 @@ function brro_clb_settings_validate($input) {
             // Invalid color, default to black
             $output['brro_clb_form_title_color'] = '#000000';
         }
+    }
+
+    // Sanitize email from address
+    if (isset($input['brro_clb_email_from_address'])) {
+        $email_address = sanitize_email($input['brro_clb_email_from_address']);
+        if (is_email($email_address)) {
+            $output['brro_clb_email_from_address'] = $email_address;
+        } else {
+            $output['brro_clb_email_from_address'] = '';
+        }
+    }
+
+    // Sanitize email from name
+    if (isset($input['brro_clb_email_from_name'])) {
+        $output['brro_clb_email_from_name'] = sanitize_text_field($input['brro_clb_email_from_name']);
     }
 
     return $output;

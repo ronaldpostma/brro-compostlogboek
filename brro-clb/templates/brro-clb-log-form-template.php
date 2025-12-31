@@ -65,10 +65,12 @@ $language = get_bloginfo('language');
                 <div style="display: flex;justify-content: space-between;gap: 20px; flex-direction:row;width: 100%;">
                     <input type="radio" id="log" name="log-action" value="log" style="display: none;">
                     <label class="clb-label-btn wide-btn" for="log">
+                        <img src="<?php echo plugins_url('img/noun-stopwatch-8218646.png', dirname(dirname(__FILE__)) . '/brro-clb.php'); ?>" alt="Compost activiteit loggen">
                         Compost activiteit loggen
                     </label>
                     <input type="radio" id="report" name="log-action" value="report" style="display: none;">
                     <label class="clb-label-btn wide-btn" for="report">
+                        <img src="<?php echo plugins_url('img/noun-book-7958954.png', dirname(dirname(__FILE__)) . '/brro-clb.php'); ?>" alt="Mijn logboek opvragen">
                         Mijn logboek opvragen
                     </label>
                 </div>

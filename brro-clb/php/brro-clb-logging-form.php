@@ -151,6 +151,27 @@ function brro_clb_handle_form_submission() {
             set_transient('brro_clb_form_success_email', $sanitized_email, 30);
         }
         
+        // Send confirmation email if requested
+        $send_confirmation = isset($_POST['clb_send_confirmation_email']) && $_POST['clb_send_confirmation_email'] === '1';
+        if ($send_confirmation && !empty($sanitized_email) && is_email($sanitized_email)) {
+            // Get email settings
+            $email_options = get_option('brro_clb_settings', array());
+            $email_from_address = isset($email_options['brro_clb_email_from_address']) ? sanitize_email($email_options['brro_clb_email_from_address']) : '';
+            $email_from_name = isset($email_options['brro_clb_email_from_name']) ? sanitize_text_field($email_options['brro_clb_email_from_name']) : '';
+            
+            // Only send if email settings are configured
+            if (!empty($email_from_address) && is_email($email_from_address) && !empty($email_from_name)) {
+                brro_clb_send_confirmation_email(
+                    $sanitized_email,
+                    $action,
+                    $display_amount,
+                    $display_unit,
+                    $activity_text,
+                    $location_name
+                );
+            }
+        }
+        
         // Redirect to prevent duplicate submissions on page refresh
         $redirect_url = remove_query_arg('submitted');
         $redirect_url = add_query_arg('submitted', 'success', $redirect_url);
@@ -161,6 +182,92 @@ function brro_clb_handle_form_submission() {
 
 // Hook into init to catch form submissions
 add_action('init', 'brro_clb_handle_form_submission');
+
+/**
+ * Send confirmation email to user after logging activity
+ * 
+ * @param string $recipient_email Recipient email address
+ * @param string $action Activity action ('input' or 'output')
+ * @param float $display_amount Amount to display
+ * @param string $display_unit Unit to display ('kilo' or 'liter')
+ * @param string $activity_text Activity text ('groenafval toegevoegd' or 'compost geoogst')
+ * @param string $location_name Location name
+ * @return bool True if email was sent successfully, false otherwise
+ */
+function brro_clb_send_confirmation_email($recipient_email, $action, $display_amount, $display_unit, $activity_text, $location_name) {
+    // Get settings
+    $options = get_option('brro_clb_settings', array());
+    $logo_url = isset($options['brro_clb_logo_url']) ? esc_url($options['brro_clb_logo_url']) : '';
+    $bg_color = isset($options['brro_clb_form_bg_color']) ? esc_attr($options['brro_clb_form_bg_color']) : '#ffffff';
+    $from_address = isset($options['brro_clb_email_from_address']) ? sanitize_email($options['brro_clb_email_from_address']) : '';
+    $from_name = isset($options['brro_clb_email_from_name']) ? sanitize_text_field($options['brro_clb_email_from_name']) : '';
+    
+    // Validate email settings
+    if (empty($from_address) || !is_email($from_address) || empty($from_name)) {
+        return false;
+    }
+    
+    // Format amount
+    $formatted_amount = number_format_i18n($display_amount, 1);
+    
+    // Build email body
+    $logo_html = '';
+    if (!empty($logo_url)) {
+        $logo_html = '<div style="text-align: center; margin-bottom: 20px;"><img src="' . esc_url($logo_url) . '" alt="Logo" style="max-width: 120px; height: auto; display: block; margin: 0 auto;"></div>';
+    }
+    
+    $logboek_url = home_url('/?logboek-opvragen');
+    
+    $email_body = '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: ' . esc_attr($bg_color) . '; font-family: Arial, sans-serif;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ' . esc_attr($bg_color) . ';">
+            <tr>
+                <td style="padding: 40px 20px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+                        <tr>
+                            <td style="padding: 40px 30px; background-color: #ffffff;">
+                                ' . $logo_html . '
+                                <h1 style="color: #000000; font-size: 24px; margin: 0 0 20px 0; text-align: center;">Hallo!</h1>
+                                <p style="color: #000000; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                                    Bedankt voor het invullen van het logboek! Je hebt ' . esc_html($formatted_amount) . ' ' . esc_html($display_unit) . ' ' . esc_html($activity_text) . '!
+                                </p>
+                                <p style="color: #000000; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                                    Wil je je volledige logboek historie bekijken? <a href="' . esc_url($logboek_url) . '" style="color: #000000; text-decoration: underline;">Klik dan hier</a>
+                                </p>
+                                <p style="color: #000000; font-size: 14px; line-height: 1.6; margin: 20px 0 0 0; border-top: 1px solid #eeeeee; padding-top: 20px;">
+                                    Vriendelijke groet,<br>
+                                    ' . esc_html($from_name) . '
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    ';
+    
+    // Set email headers
+    $headers = array(
+        'Content-Type: text/html; charset=UTF-8',
+        'From: ' . $from_name . ' <' . $from_address . '>'
+    );
+    
+    // Set subject
+    $subject = 'Bevestiging logboek activiteit';
+    
+    // Send email
+    $sent = wp_mail($recipient_email, $subject, $email_body, $headers);
+    
+    return $sent;
+}
 
 /**
  * Get the log form HTML (reusable function)
@@ -265,12 +372,12 @@ function brro_clb_get_log_form($location_post_id = null) {
             </div>
             <input type="radio" id="input" name="clb_action" value="input" style="display: none;">
             <label class="clb-label-btn" for="input">
-                <img src="<?php echo plugins_url('img/noun-trash-6869140.png', dirname(dirname(__FILE__))); ?>" alt="Groenafval toevoegen">
+                <img src="<?php echo plugins_url('img/noun-trash-6869140.png', dirname(dirname(__FILE__)) . '/brro-clb.php'); ?>" alt="Groenafval toevoegen">
                 Groenafval toevoegen
             </label>
             <input type="radio" id="output" name="clb_action" value="output" style="display: none;">
             <label class="clb-label-btn" for="output">
-                <img src="<?php echo plugins_url('img/noun-compost-6898126.png', dirname(dirname(__FILE__))); ?>" alt="Compost oogsten">
+                <img src="<?php echo plugins_url('img/noun-compost-6898126.png', dirname(dirname(__FILE__)) . '/brro-clb.php'); ?>" alt="Compost oogsten">
                 Compost oogsten
             </label>
         </div>
@@ -292,7 +399,7 @@ function brro_clb_get_log_form($location_post_id = null) {
                     <!-- default units kg and liter -->
                     <input type="radio" id="unit_type_kg" name="clb_unit_type" value="kg" style="display: none;">
                     <label class="clb-label-btn" for="unit_type_kg">
-                        <img src="<?php echo plugins_url('img/clb-unit-kg.png', dirname(dirname(__FILE__))); ?>" alt="Kg">
+                        <img src="<?php echo plugins_url('img/clb-unit-kg.png', dirname(dirname(__FILE__)) . '/brro-clb.php'); ?>" alt="Kg">
                         Kg
                     </label>
                     <?php
@@ -303,7 +410,7 @@ function brro_clb_get_log_form($location_post_id = null) {
                     <?php if ($input_volweight > 0 && $output_volweight > 0): ?>
                     <input type="radio" id="unit_type_liter" name="clb_unit_type" value="liter" data-input-weight="<?php echo esc_attr($input_volweight); ?>" data-output-weight="<?php echo esc_attr($output_volweight); ?>" style="display: none;">
                     <label class="clb-label-btn" for="unit_type_liter">
-                        <img src="<?php echo plugins_url('img/clb-unit-l.png', dirname(dirname(__FILE__))); ?>" alt="Liter">
+                        <img src="<?php echo plugins_url('img/clb-unit-l.png', dirname(dirname(__FILE__)) . '/brro-clb.php'); ?>" alt="Liter">
                         Liter
                     </label>
                 </div>
@@ -376,6 +483,10 @@ function brro_clb_get_log_form($location_post_id = null) {
                 <div style="width:100%">
                     <input type="checkbox" id="clb_user_email_save" name="clb_user_email_save" value="1">
                     <label for="clb_user_email_save">Onthoud mijn emailadres voor de volgende keer</label>
+                </div>
+                <div style="width:100%">
+                    <input type="checkbox" id="clb_send_confirmation_email" name="clb_send_confirmation_email" value="1">
+                    <label for="clb_send_confirmation_email">Stuur me een bevestigingsemail</label>
                 </div>
             </div>
 

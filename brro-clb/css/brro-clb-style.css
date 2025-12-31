@@ -370,7 +370,7 @@ form .clb-unit-buttons {
 form .clb-form-row.clb-hidden {
     opacity: 0.4;
     pointer-events: none;
-    /*display: none;*/
+    display: none;
 }
 
 /* Label button styles (radio button labels) */
