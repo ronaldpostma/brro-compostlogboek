@@ -197,7 +197,7 @@ add_action('init', 'brro_clb_handle_form_submission');
 function brro_clb_send_confirmation_email($recipient_email, $action, $display_amount, $display_unit, $activity_text, $location_name) {
     // Get settings
     $options = get_option('brro_clb_settings', array());
-    $logo_url = isset($options['brro_clb_logo_url']) ? esc_url($options['brro_clb_logo_url']) : '';
+    $logo_url_raw = isset($options['brro_clb_logo_url']) ? $options['brro_clb_logo_url'] : '';
     $bg_color = isset($options['brro_clb_form_bg_color']) ? esc_attr($options['brro_clb_form_bg_color']) : '#ffffff';
     $from_address = isset($options['brro_clb_email_from_address']) ? sanitize_email($options['brro_clb_email_from_address']) : '';
     $from_name = isset($options['brro_clb_email_from_name']) ? sanitize_text_field($options['brro_clb_email_from_name']) : '';
@@ -212,8 +212,10 @@ function brro_clb_send_confirmation_email($recipient_email, $action, $display_am
     
     // Build email body
     $logo_html = '';
-    if (!empty($logo_url)) {
-        $logo_html = '<div style="text-align: center; margin-bottom: 20px;"><img src="' . esc_url($logo_url) . '" alt="Logo" style="max-width: 120px; height: auto; display: block; margin: 0 auto;"></div>';
+    if (!empty($logo_url_raw)) {
+        // Use raw URL and escape only when outputting in HTML
+        $logo_url = esc_url($logo_url_raw);
+        $logo_html = '<div style="text-align: center; margin-bottom: 20px;"><img src="' . $logo_url . '" alt="Logo" style="max-width: 120px; height: auto; display: block; margin: 0 auto;"></div>';
     }
     
     $logboek_url = home_url('/?logboek-opvragen');
@@ -232,7 +234,6 @@ function brro_clb_send_confirmation_email($recipient_email, $action, $display_am
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
                         <tr>
                             <td style="padding: 40px 30px; background-color: #ffffff;">
-                                ' . $logo_html . '
                                 <h1 style="color: #000000; font-size: 24px; margin: 0 0 20px 0; text-align: center;">Hallo!</h1>
                                 <p style="color: #000000; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
                                     Bedankt voor het invullen van het logboek! Je hebt ' . esc_html($formatted_amount) . ' ' . esc_html($display_unit) . ' ' . esc_html($activity_text) . '!
@@ -529,4 +530,3 @@ function brro_clb_get_log_form($location_post_id = null) {
     <?php
     return ob_get_clean();
 }
-

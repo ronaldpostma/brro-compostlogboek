@@ -111,4 +111,3 @@ $language = get_bloginfo('language');
     <?php wp_footer(); ?>
 </body>
 </html>
-
