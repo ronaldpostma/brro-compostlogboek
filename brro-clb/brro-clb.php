@@ -3,7 +3,7 @@
  * Plugin Name: Brro Compost Logboek
  * Plugin URI: https://github.com/ronaldpostma/brro-compostlogboek
  * Description: Custom style, script and functions for Compost Logboek
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Ronald Postma 
  * Author URI: https://brro.nl/
  * 
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants
-define( 'brro_clb_version', '1.0.1' );
+define( 'brro_clb_version', '1.0.2' );
 define( 'brro_clb_dir', plugin_dir_path( __FILE__ ) );
 define( 'brro_clb_url', plugin_dir_url( __FILE__ ) );
 
